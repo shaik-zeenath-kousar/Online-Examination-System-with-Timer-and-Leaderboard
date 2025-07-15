@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Student Signup - Online Examination System{% endblock %}
+
+{% block content %}
+<div class="min-h-screen gradient-bg flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="glass-effect rounded-xl p-8 max-w-md w-full">
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-bold text-white mb-2">Create Account</h2>
+            <p class="text-gray-200">Join our examination platform</p>
+        </div>
+        
+        <form action="{{ url_for('signup') }}" method="POST" class="space-y-6">
+            <div>
+                <label for="name" class="block text-sm font-medium text-white mb-2">Full Name</label>
+                <input type="text" id="name" name="name" required 
+                       class="w-full px-3 py-2 bg-white bg-opacity-20 border border-white border-opacity-30 rounded-lg text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-accent"
+                       placeholder="Enter your full name">
+            </div>
+            
+            <div>
+                <label for="roll_no" class="block text-sm font-medium text-white mb-2">Roll Number</label>
+                <input type="text" id="roll_no" name="roll_no" required 
+                       class="w-full px-3 py-2 bg-white bg-opacity-20 border border-white border-opacity-30 rounded-lg text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-accent"
+                       placeholder="Enter your roll number">
+            </div>
+            
+            <div>
+                <label for="class" class="block text-sm font-medium text-white mb-2">Class</label>
+                <select id="class" name="class" required 
+                        class="w-full px-3 py-2 bg-white bg-opacity-20 border border-white border-opacity-30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent">
+                    <option value="" class="text-gray-800">Select your class</option>
+                    <option value="1st Year" class="text-gray-800">1st Year</option>
+                    <option value="2nd Year" class="text-gray-800">2nd Year</option>
+                    <option value="3rd Year" class="text-gray-800">3rd Year</option>
+                    <option value="4th Year" class="text-gray-800">4th Year</option>
+                </select>
+            </div>
+            
+            <div>
+                <label for="branch" class="block text-sm font-medium text-white mb-2">Branch</label>
+                <select id="branch" name="branch" required 
+                        class="w-full px-3 py-2 bg-white bg-opacity-20 border border-white border-opacity-30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-accent">
+                    <option value="" class="text-gray-800">Select your branch</option>
+                    <option value="Computer Science" class="text-gray-800">Computer Science</option>
+                    <option value="Information Technology" class="text-gray-800">Information Technology</option>
+                    <option value="Electronics" class="text-gray-800">Electronics</option>
+                    <option value="Mechanical" class="text-gray-800">Mechanical</option>
+                    <option value="Civil" class="text-gray-800">Civil</option>
+                    <option value="Electrical" class="text-gray-800">Electrical</option>
+                </select>
+            </div>
+            
+            <div>
+                <label for="password" class="block text-sm font-medium text-white mb-2">Password</label>
+                <input type="password" id="password" name="password" required 
+                       class="w-full px-3 py-2 bg-white bg-opacity-20 border border-white border-opacity-30 rounded-lg text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-accent"
+                       placeholder="Create a strong password">
+            </div>
+            
+            <button type="submit" class="w-full bg-accent text-white py-3 px-4 rounded-lg font-medium hover:bg-yellow-600 transition duration-150 ease-in-out">
+                Create Account
+            </button>
+        </form>
+        
+        <div class="text-center mt-6">
+            <p class="text-gray-200">
+                Already have an account? 
+                <a href="{{ url_for('login') }}" class="text-accent hover:text-yellow-400 font-medium">Login here</a>
+            </p>
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="{{ url_for('home') }}" class="text-gray-300 hover:text-white text-sm">
+                ← Back to Home
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %} 

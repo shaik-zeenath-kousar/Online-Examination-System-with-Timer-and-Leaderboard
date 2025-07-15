@@ -1,0 +1,391 @@
+{% extends "base.html" %}
+
+{% block title %}Create Test - Online Examination System{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-yellow-50">
+    <!-- Header Section -->
+    <div class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="h-10 w-10 bg-gradient-to-r from-accent to-yellow-500 rounded-lg flex items-center justify-center">
+                        <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">Create New Test</h1>
+                        <p class="text-gray-600 mt-1">Set up objective or textual examinations for your students</p>
+                    </div>
+                </div>
+                <a href="{{ url_for('admin_dashboard') }}" class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition duration-150">
+                    <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                    Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Test Type Selection -->
+        <div class="bg-white rounded-2xl shadow-xl p-8 mb-8 border border-gray-100">
+            <div class="text-center mb-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">Choose Test Type</h2>
+                <p class="text-gray-600">Select the type of examination you want to create</p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <button onclick="selectTestType('objective')" id="objective-btn" 
+                        class="test-type-btn group relative p-8 border-2 border-gray-200 rounded-xl hover:border-accent hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-white to-gray-50">
+                    <div class="text-center">
+                        <div class="mx-auto h-16 w-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                            <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-3">Objective Test</h3>
+                        <p class="text-gray-600 mb-4">Multiple choice questions with automatic scoring</p>
+                        <div class="flex items-center justify-center space-x-2 text-sm text-gray-500">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span>Auto-graded</span>
+                            <span>•</span>
+                            <span>Instant results</span>
+                        </div>
+                    </div>
+                </button>
+
+                <button onclick="selectTestType('textual')" id="textual-btn" 
+                        class="test-type-btn group relative p-8 border-2 border-gray-200 rounded-xl hover:border-accent hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-white to-gray-50">
+                    <div class="text-center">
+                        <div class="mx-auto h-16 w-16 bg-gradient-to-r from-green-500 to-green-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                            <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-3">Textual Test</h3>
+                        <p class="text-gray-600 mb-4">Essay questions with manual evaluation</p>
+                        <div class="flex items-center justify-center space-x-2 text-sm text-gray-500">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                            </svg>
+                            <span>Manual grading</span>
+                            <span>•</span>
+                            <span>Detailed feedback</span>
+                        </div>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Objective Test Form -->
+        <form id="objective-form" action="{{ url_for('create_test') }}" method="POST" class="hidden">
+            <input type="hidden" name="test_type" value="objective">
+            
+            <!-- Test Details Section -->
+            <div class="bg-white rounded-2xl shadow-xl p-8 mb-8 border border-gray-100">
+                <div class="flex items-center mb-6">
+                    <div class="h-8 w-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mr-3">
+                        <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-900">Test Details</h2>
+                </div>
+                
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="space-y-2">
+                        <label for="exam_name" class="block text-sm font-semibold text-gray-700">Exam Name</label>
+                        <input type="text" id="exam_name" name="exam_name" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                               placeholder="Enter exam name">
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <label for="exam_date" class="block text-sm font-semibold text-gray-700">Exam Date & Time</label>
+                        <input type="datetime-local" id="exam_date" name="exam_date" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200">
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <label for="duration" class="block text-sm font-semibold text-gray-700">Duration (minutes)</label>
+                        <input type="number" id="duration" name="duration" required min="1" max="300"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                               placeholder="Enter duration">
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <label for="num_questions" class="block text-sm font-semibold text-gray-700">Number of Questions</label>
+                        <input type="number" id="num_questions" name="num_questions" required min="1" max="50"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                               placeholder="Enter number of questions">
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <label for="marks_per_question" class="block text-sm font-semibold text-gray-700">Marks per Question</label>
+                        <input type="number" id="marks_per_question" name="marks_per_question" required min="1" max="10"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                               placeholder="Enter marks per question">
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <label for="total_marks" class="block text-sm font-semibold text-gray-700">Total Marks</label>
+                        <input type="number" id="total_marks" name="total_marks" required min="1"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                               placeholder="Auto-calculated" readonly>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Questions Section -->
+            <div id="questions-section" class="bg-white rounded-2xl shadow-xl p-8 mb-8 border border-gray-100">
+                <div class="flex items-center mb-6">
+                    <div class="h-8 w-8 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center mr-3">
+                        <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-900">Questions</h2>
+                </div>
+                <div id="questions-container" class="space-y-6">
+                    <!-- Questions will be dynamically added here -->
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex justify-end space-x-4">
+                <button type="button" onclick="window.history.back()" 
+                        class="px-8 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition duration-200 font-medium">
+                    Cancel
+                </button>
+                <button type="submit" 
+                        class="px-8 py-3 bg-gradient-to-r from-accent to-yellow-500 text-white rounded-xl hover:from-yellow-500 hover:to-accent transition duration-200 font-medium shadow-lg">
+                    Create Test
+                </button>
+            </div>
+        </form>
+
+        <!-- Textual Test Form -->
+        <form id="textual-form" action="{{ url_for('create_test') }}" method="POST" enctype="multipart/form-data" class="hidden">
+            <input type="hidden" name="test_type" value="textual">
+            
+            <!-- Test Details Section -->
+            <div class="bg-white rounded-2xl shadow-xl p-8 mb-8 border border-gray-100">
+                <div class="flex items-center mb-6">
+                    <div class="h-8 w-8 bg-gradient-to-r from-green-500 to-green-600 rounded-lg flex items-center justify-center mr-3">
+                        <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-900">Test Details</h2>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label for="textual_exam_name" class="block text-sm font-semibold text-gray-700">Exam Name</label>
+                        <input type="text" id="textual_exam_name" name="exam_name" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200"
+                               placeholder="Enter exam name">
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <label for="textual_exam_date" class="block text-sm font-semibold text-gray-700">Exam Date & Time</label>
+                        <input type="datetime-local" id="textual_exam_date" name="exam_date" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200">
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <label for="textual_duration" class="block text-sm font-semibold text-gray-700">Duration (minutes)</label>
+                        <input type="number" id="textual_duration" name="duration" required min="1" max="300"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200"
+                               placeholder="Enter duration">
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <label for="textual_total_marks" class="block text-sm font-semibold text-gray-700">Total Marks</label>
+                        <input type="number" id="textual_total_marks" name="total_marks" required min="1"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition duration-200"
+                               placeholder="Enter total marks">
+                    </div>
+                </div>
+            </div>
+
+            <!-- File Upload Section -->
+            <div class="bg-white rounded-2xl shadow-xl p-8 mb-8 border border-gray-100">
+                <div class="flex items-center mb-6">
+                    <div class="h-8 w-8 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg flex items-center justify-center mr-3">
+                        <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-900">Question File</h2>
+                </div>
+                
+                <div class="space-y-4">
+                    <label for="question_file" class="block text-sm font-semibold text-gray-700">Upload Question Document (.docx)</label>
+                    <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-accent transition duration-200">
+                        <input type="file" id="question_file" name="question_file" required accept=".docx"
+                               class="hidden">
+                        <label for="question_file" class="cursor-pointer">
+                            <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                            </svg>
+                            <p class="text-lg font-medium text-gray-900 mb-2">Click to upload or drag and drop</p>
+                            <p class="text-sm text-gray-500">DOCX files only, max 10MB</p>
+                        </label>
+                    </div>
+                    <p class="text-sm text-gray-500">Upload a .docx file containing the questions for the test</p>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex justify-end space-x-4">
+                <button type="button" onclick="window.history.back()" 
+                        class="px-8 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition duration-200 font-medium">
+                    Cancel
+                </button>
+                <button type="submit" 
+                        class="px-8 py-3 bg-gradient-to-r from-accent to-yellow-500 text-white rounded-xl hover:from-yellow-500 hover:to-accent transition duration-200 font-medium shadow-lg">
+                    Create Test
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let selectedTestType = null;
+let questionCount = 0;
+
+function selectTestType(type) {
+    selectedTestType = type;
+    
+    // Update button styles
+    document.querySelectorAll('.test-type-btn').forEach(btn => {
+        btn.classList.remove('border-accent', 'bg-accent', 'text-white');
+        btn.classList.add('border-gray-200');
+    });
+    
+    const selectedBtn = document.getElementById(type + '-btn');
+    selectedBtn.classList.remove('border-gray-200');
+    selectedBtn.classList.add('border-accent', 'bg-gradient-to-br', 'from-accent/10', 'to-yellow-500/10');
+    
+    // Show/hide forms
+    document.getElementById('objective-form').classList.add('hidden');
+    document.getElementById('textual-form').classList.add('hidden');
+    
+    if (type === 'objective') {
+        document.getElementById('objective-form').classList.remove('hidden');
+        generateQuestions();
+    } else {
+        document.getElementById('textual-form').classList.remove('hidden');
+    }
+}
+
+function generateQuestions() {
+    const numQuestions = parseInt(document.getElementById('num_questions').value) || 0;
+    const container = document.getElementById('questions-container');
+    container.innerHTML = '';
+    
+    for (let i = 0; i < numQuestions; i++) {
+        const questionDiv = document.createElement('div');
+        questionDiv.className = 'bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-xl p-6 hover:shadow-md transition-all duration-200';
+        questionDiv.innerHTML = `
+            <div class="flex items-center mb-6">
+                <div class="h-8 w-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mr-3">
+                    <span class="text-white font-bold text-sm">${i + 1}</span>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900">Question ${i + 1}</h3>
+            </div>
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-3">Question</label>
+                    <textarea name="question_${i}" required rows="3" 
+                              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 resize-none"
+                              placeholder="Enter your question here..."></textarea>
+                </div>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700">Option A</label>
+                        <input type="text" name="option_${i}_0" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                               placeholder="Enter option A">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700">Option B</label>
+                        <input type="text" name="option_${i}_1" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                               placeholder="Enter option B">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700">Option C</label>
+                        <input type="text" name="option_${i}_2" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                               placeholder="Enter option C">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-gray-700">Option D</label>
+                        <input type="text" name="option_${i}_3" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                               placeholder="Enter option D">
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label class="block text-sm font-semibold text-gray-700">Correct Answer</label>
+                    <select name="correct_${i}" required 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 bg-white">
+                        <option value="">Select correct answer</option>
+                        <option value="0">Option A</option>
+                        <option value="1">Option B</option>
+                        <option value="2">Option C</option>
+                        <option value="3">Option D</option>
+                    </select>
+                </div>
+            </div>
+        `;
+        container.appendChild(questionDiv);
+    }
+}
+
+// Auto-calculate total marks for objective test
+document.addEventListener('DOMContentLoaded', function() {
+    const numQuestionsInput = document.getElementById('num_questions');
+    const marksPerQuestionInput = document.getElementById('marks_per_question');
+    const totalMarksInput = document.getElementById('total_marks');
+    
+    function calculateTotalMarks() {
+        const numQuestions = parseInt(numQuestionsInput.value) || 0;
+        const marksPerQuestion = parseInt(marksPerQuestionInput.value) || 0;
+        const totalMarks = numQuestions * marksPerQuestion;
+        totalMarksInput.value = totalMarks;
+        
+        if (numQuestions > 0) {
+            generateQuestions();
+        }
+    }
+    
+    numQuestionsInput.addEventListener('input', calculateTotalMarks);
+    marksPerQuestionInput.addEventListener('input', calculateTotalMarks);
+    
+    // File upload preview for textual test
+    const fileInput = document.getElementById('question_file');
+    if (fileInput) {
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const label = fileInput.nextElementSibling.querySelector('p');
+                label.textContent = `Selected: ${file.name}`;
+                label.classList.add('text-accent', 'font-medium');
+            }
+        });
+    }
+});
+</script>
+{% endblock %} 

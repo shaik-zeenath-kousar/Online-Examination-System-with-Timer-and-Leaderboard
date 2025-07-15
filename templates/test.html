@@ -1,0 +1,263 @@
+{% extends "base.html" %}
+
+{% block title %}{{ test.exam_name }} - Online Examination System{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-100">
+    <!-- Header with Timer -->
+    <div class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">{{ test.exam_name }}</h1>
+                    <p class="text-gray-600">{{ test.test_type.title() }} Test</p>
+                </div>
+                <div class="text-right">
+                    <div class="text-sm text-gray-600">Time Remaining</div>
+                    <div id="timer" class="text-3xl font-bold text-accent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {% if test.test_type == 'objective' %}
+        <!-- Objective Test -->
+        <form id="test-form">
+            <div class="space-y-6">
+                {% for i, question in enumerate(test.questions) %}
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="mb-4">
+                        <span class="inline-block bg-accent text-white text-sm font-medium px-3 py-1 rounded-full mb-3">
+                            Question {{ i + 1 }} of {{ test.questions|length }}
+                        </span>
+                        <h3 class="text-lg font-semibold text-gray-900">{{ question.question }}</h3>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        {% for j, option in enumerate(question.options) %}
+                        <label class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition duration-150">
+                            <input type="radio" name="answer_{{ i }}" value="{{ j }}" class="h-4 w-4 text-accent focus:ring-accent border-gray-300">
+                            <span class="ml-3 text-gray-900">{{ option }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </form>
+        {% else %}
+        <!-- Textual Test -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">Questions</h2>
+            <div class="prose max-w-none whitespace-pre-line">
+                {{ test.question_text|nl2br }}
+            </div>
+        </div>
+        
+        <form id="test-form">
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">Your Answer</h2>
+                <textarea id="answer-text" name="answer_text" rows="15" 
+                          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent resize-none"
+                          placeholder="Type your answer here..."></textarea>
+            </div>
+        </form>
+        {% endif %}
+
+        <!-- Submit Button -->
+        <div class="mt-8 flex justify-between items-center">
+            <div class="text-sm text-gray-600">
+                Total Marks: {{ test.total_marks }}
+            </div>
+            <button onclick="submitTest()" id="submit-btn" 
+                    class="bg-accent text-white px-8 py-3 rounded-lg font-medium hover:bg-yellow-600 transition duration-150">
+                Submit Test
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div id="confirm-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-xl p-8 max-w-md w-full">
+            <h3 class="text-xl font-bold text-gray-900 mb-4">Confirm Submission</h3>
+            <p class="text-gray-600 mb-6">Are you sure you want to submit your test? This action cannot be undone.</p>
+            <div class="flex justify-end space-x-4">
+                <button onclick="closeConfirmModal()" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition duration-150">
+                    Cancel
+                </button>
+                <button onclick="confirmSubmit()" class="bg-accent text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition duration-150">
+                    Submit
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let startTime = Date.now();
+let timeLimit = {{ test.duration * 60 * 1000 }}; // Convert minutes to milliseconds
+let timerInterval;
+let isSubmitted = false;
+
+// Initialize timer
+function initTimer() {
+    updateTimer();
+    timerInterval = setInterval(updateTimer, 1000);
+}
+
+function updateTimer() {
+    const now = Date.now();
+    const elapsed = now - startTime;
+    const remaining = timeLimit - elapsed;
+    
+    if (remaining <= 0) {
+        clearInterval(timerInterval);
+        document.getElementById('timer').textContent = '00:00';
+        document.getElementById('timer').className = 'text-3xl font-bold text-red-600';
+        autoSubmit();
+        return;
+    }
+    
+    const minutes = Math.floor(remaining / 60000);
+    const seconds = Math.floor((remaining % 60000) / 1000);
+    
+    document.getElementById('timer').textContent = 
+        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    
+    // Change color when time is running low
+    if (remaining < 300000) { // Less than 5 minutes
+        document.getElementById('timer').className = 'text-3xl font-bold text-red-600';
+    } else if (remaining < 600000) { // Less than 10 minutes
+        document.getElementById('timer').className = 'text-3xl font-bold text-yellow-600';
+    }
+}
+
+function submitTest() {
+    if (isSubmitted) return;
+    
+    // Check if all questions are answered for objective test
+    {% if test.test_type == 'objective' %}
+    const totalQuestions = {{ test.questions|length }};
+    let answeredQuestions = 0;
+    
+    for (let i = 0; i < totalQuestions; i++) {
+        if (document.querySelector(`input[name="answer_${i}"]:checked`)) {
+            answeredQuestions++;
+        }
+    }
+    
+    if (answeredQuestions < totalQuestions) {
+        const unanswered = totalQuestions - answeredQuestions;
+        if (!confirm(`You have ${unanswered} unanswered question(s). Are you sure you want to submit?`)) {
+            return;
+        }
+    }
+    {% endif %}
+    
+    // Show confirmation modal
+    document.getElementById('confirm-modal').classList.remove('hidden');
+}
+
+function closeConfirmModal() {
+    document.getElementById('confirm-modal').classList.add('hidden');
+}
+
+function confirmSubmit() {
+    if (isSubmitted) return;
+    isSubmitted = true;
+    
+    // Disable submit button
+    document.getElementById('submit-btn').disabled = true;
+    document.getElementById('submit-btn').textContent = 'Submitting...';
+    document.getElementById('submit-btn').className = 'bg-gray-400 text-white px-8 py-3 rounded-lg font-medium cursor-not-allowed';
+    
+    // Calculate submission time
+    const submissionTime = Math.floor((Date.now() - startTime) / 1000); // in seconds
+    
+    // Prepare submission data
+    const submissionData = {
+        submission_time: submissionTime
+    };
+    
+    {% if test.test_type == 'objective' %}
+    // Collect answers for objective test
+    const answers = [];
+    const totalQuestions = {{ test.questions|length }};
+    
+    for (let i = 0; i < totalQuestions; i++) {
+        const selected = document.querySelector(`input[name="answer_${i}"]:checked`);
+        answers.push(selected ? parseInt(selected.value) : -1);
+    }
+    
+    submissionData.answers = answers;
+    {% else %}
+    // Get answer text for textual test
+    submissionData.answer_text = document.getElementById('answer-text').value;
+    {% endif %}
+    
+    // Submit to server
+    fetch('{{ url_for("submit_test", test_id=test._id) }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(submissionData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Test submitted successfully!');
+            window.location.href = '{{ url_for("student_dashboard") }}';
+        } else {
+            alert('Error submitting test: ' + (data.error || 'Unknown error'));
+            isSubmitted = false;
+            document.getElementById('submit-btn').disabled = false;
+            document.getElementById('submit-btn').textContent = 'Submit Test';
+            document.getElementById('submit-btn').className = 'bg-accent text-white px-8 py-3 rounded-lg font-medium hover:bg-yellow-600 transition duration-150';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error submitting test. Please try again.');
+        isSubmitted = false;
+        document.getElementById('submit-btn').disabled = false;
+        document.getElementById('submit-btn').textContent = 'Submit Test';
+        document.getElementById('submit-btn').className = 'bg-accent text-white px-8 py-3 rounded-lg font-medium hover:bg-yellow-600 transition duration-150';
+    });
+}
+
+function autoSubmit() {
+    if (isSubmitted) return;
+    
+    alert('Time is up! Your test will be submitted automatically.');
+    confirmSubmit();
+}
+
+// Prevent leaving the page
+window.addEventListener('beforeunload', function(e) {
+    if (!isSubmitted) {
+        e.preventDefault();
+        e.returnValue = 'Are you sure you want to leave? Your test progress will be lost.';
+    }
+});
+
+// Initialize timer when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    initTimer();
+    
+    // Set minimum datetime for exam date
+    const now = new Date();
+    const examDate = new Date('{{ test.exam_date.isoformat() }}');
+    
+    if (now < examDate) {
+        alert('Test has not started yet!');
+        window.location.href = '{{ url_for("student_dashboard") }}';
+    }
+});
+</script>
+{% endblock %} 

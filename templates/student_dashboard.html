@@ -1,0 +1,331 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard - Online Examination System{% endblock %}
+
+{% block content %}
+<div class="flex h-screen bg-gray-100">
+    <!-- Sidebar -->
+    <div class="sidebar w-64 flex-shrink-0">
+        <div class="p-6">
+            <div class="flex items-center mb-8">
+                <div class="h-8 w-8 bg-accent rounded-lg flex items-center justify-center mr-3">
+                    <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+                <h1 class="text-white font-bold text-lg">Exam System</h1>
+            </div>
+            
+            <nav class="space-y-2">
+                <a href="#dashboard" class="flex items-center px-4 py-3 text-white bg-white bg-opacity-20 rounded-lg">
+                    <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v2H8V5z"></path>
+                    </svg>
+                    Dashboard
+                </a>
+                
+                <button onclick="showProfile()" class="w-full flex items-center px-4 py-3 text-gray-300 hover:text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition duration-150">
+                    <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    Profile
+                </button>
+                
+                <a href="#tests" class="flex items-center px-4 py-3 text-gray-300 hover:text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition duration-150">
+                    <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    All Tests
+                </a>
+                
+                <a href="{{ url_for('student_scores') }}" class="flex items-center px-4 py-3 text-gray-300 hover:text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition duration-150">
+                    <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                    Your Scores
+                </a>
+                
+                <a href="{{ url_for('leaderboard') }}" class="flex items-center px-4 py-3 text-gray-300 hover:text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition duration-150">
+                    <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                    </svg>
+                    Leaderboard
+                </a>
+            </nav>
+        </div>
+        
+        <div class="absolute bottom-6 left-6 right-6">
+            <a href="{{ url_for('logout') }}" class="flex items-center px-4 py-3 text-gray-300 hover:text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition duration-150">
+                <svg class="h-5 w-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                </svg>
+                Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 overflow-auto">
+        <div class="p-8">
+            <!-- Header -->
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Welcome back, {{ session.user_name }}!</h1>
+                <p class="text-gray-600">Here's what's happening with your exams today.</p>
+            </div>
+
+            <!-- Tests Section -->
+            {% if tests %}
+            <div class="mb-8" id="tests">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">Tests</h2>
+                <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {% for test in tests %}
+                    <div class="bg-white rounded-xl shadow-lg p-6 card-hover test-card" data-test-id="{{ test._id }}" data-exam-date="{{ test.exam_date.isoformat() }}" data-duration="{{ test.duration }}">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900">{{ test.exam_name }}</h3>
+                            <span class="px-3 py-1 text-xs font-medium rounded-full 
+                                {% if test.test_type == 'objective' %}bg-blue-100 text-blue-800{% else %}bg-green-100 text-green-800{% endif %}">
+                                {{ test.test_type.title() }}
+                            </span>
+                        </div>
+                        
+                        <div class="space-y-3 mb-4">
+                            <div class="flex items-center text-sm text-gray-600">
+                                <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                                {{ test.exam_date.strftime('%B %d, %Y at %I:%M %p') }}
+                            </div>
+                            
+                            <div class="flex items-center text-sm text-gray-600">
+                                <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                Duration: {{ test.duration }} minutes
+                            </div>
+                            
+                            <div class="flex items-center text-sm text-gray-600">
+                                <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                                Total Marks: {{ test.total_marks }}
+                            </div>
+                        </div>
+
+                        <!-- Countdown Timer -->
+                        <div class="mb-4">
+                            <div class="text-sm text-gray-600 mb-2">Time until exam starts:</div>
+                            <div id="timer-{{ test._id }}" class="text-2xl font-bold text-accent"></div>
+                        </div>
+
+                        <!-- Start Test Button (only show during test window) -->
+                        <div id="test-status-{{ test._id }}" class="test-status">
+                            <!-- Status will be determined by JavaScript -->
+                        </div>
+
+                        <!-- View Leaderboard Link (show after test ends) -->
+                        <div id="leaderboard-link-{{ test._id }}" class="leaderboard-link hidden mt-3">
+                            <a href="{{ url_for('exam_leaderboard', test_id=test._id) }}" 
+                               class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-600 transition duration-150 ease-in-out text-center block">
+                                View Leaderboard
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+
+<!-- Profile Modal -->
+<div id="profile-modal" class="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full hidden z-50 backdrop-blur-sm">
+    <div class="relative top-20 mx-auto p-0 border-0 w-96 shadow-2xl rounded-2xl bg-white transform transition-all duration-300 scale-95 opacity-0" id="modal-content">
+        <!-- Header with gradient background -->
+        <div class="bg-gradient-to-r from-accent to-yellow-500 rounded-t-2xl p-6 text-white">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-3">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold">Student Profile</h3>
+                        <p class="text-sm opacity-90">Personal Information</p>
+                    </div>
+                </div>
+                <button onclick="hideProfile()" class="text-white hover:text-gray-200 transition-colors duration-200 p-2 rounded-full hover:bg-white hover:bg-opacity-20" title="Close profile">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Profile Content -->
+        <div class="p-6">
+            {% if student_profile %}
+            <div class="space-y-4">
+                <div class="bg-gray-50 rounded-xl p-4 hover:bg-gray-100 transition-colors duration-200">
+                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Full Name</label>
+                    <p class="text-gray-900 font-medium">{{ student_profile.name }}</p>
+                </div>
+                
+                <div class="bg-gray-50 rounded-xl p-4 hover:bg-gray-100 transition-colors duration-200">
+                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Roll Number</label>
+                    <p class="text-gray-900 font-medium">{{ student_profile.roll_no }}</p>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-gray-50 rounded-xl p-4 hover:bg-gray-100 transition-colors duration-200">
+                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Year</label>
+                        <p class="text-gray-900 font-medium">{{ student_profile.class }}</p>
+                    </div>
+                    
+                    <div class="bg-gray-50 rounded-xl p-4 hover:bg-gray-100 transition-colors duration-200">
+                        <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Branch</label>
+                        <p class="text-gray-900 font-medium">{{ student_profile.branch }}</p>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="text-center py-8">
+                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">Profile Not Available</h3>
+                <p class="text-gray-500">Profile information could not be loaded.</p>
+            </div>
+            {% endif %}
+            
+            <div class="mt-6 pt-6 border-t border-gray-200">
+                <button onclick="hideProfile()" class="w-full bg-gradient-to-r from-accent to-yellow-500 text-white px-6 py-3 rounded-xl font-medium hover:from-yellow-500 hover:to-accent transition-all duration-200 transform hover:scale-105 shadow-lg">
+                    Close Profile
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Profile modal functions
+function showProfile() {
+    const modal = document.getElementById('profile-modal');
+    const modalContent = document.getElementById('modal-content');
+    
+    modal.classList.remove('hidden');
+    
+    // Trigger animation after a small delay
+    setTimeout(() => {
+        modalContent.classList.remove('scale-95', 'opacity-0');
+        modalContent.classList.add('scale-100', 'opacity-100');
+    }, 10);
+}
+
+function hideProfile() {
+    const modal = document.getElementById('profile-modal');
+    const modalContent = document.getElementById('modal-content');
+    
+    // Trigger closing animation
+    modalContent.classList.remove('scale-100', 'opacity-100');
+    modalContent.classList.add('scale-95', 'opacity-0');
+    
+    // Hide modal after animation completes
+    setTimeout(() => {
+        modal.classList.add('hidden');
+    }, 300);
+}
+
+// Close modal when clicking outside
+document.getElementById('profile-modal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        hideProfile();
+    }
+});
+
+// Countdown timer functionality
+function updateTimer(testId, examDate, duration) {
+    const timerElement = document.getElementById(`timer-${testId}`);
+    if (!timerElement) return;
+
+    const now = new Date().getTime();
+    const examTime = new Date(examDate).getTime();
+    const examEndTime = examTime + (duration * 60 * 1000);
+    const distance = examTime - now;
+
+    if (distance > 0) {
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        let timeString = '';
+        if (days > 0) timeString += `${days}d `;
+        if (hours > 0) timeString += `${hours}h `;
+        if (minutes > 0) timeString += `${minutes}m `;
+        timeString += `${seconds}s`;
+
+        timerElement.textContent = timeString;
+        timerElement.className = 'text-2xl font-bold text-accent';
+    } else if (now <= examEndTime) {
+        // Test is currently active
+        timerElement.textContent = 'Test Started!';
+        timerElement.className = 'text-2xl font-bold text-green-600';
+    } else {
+        // Test has ended
+        timerElement.textContent = 'Test Ended!';
+        timerElement.className = 'text-2xl font-bold text-red-600';
+    }
+}
+
+// Update test status buttons
+function updateTestStatus(testId, examDate, duration) {
+    const statusElement = document.getElementById(`test-status-${testId}`);
+    const leaderboardElement = document.getElementById(`leaderboard-link-${testId}`);
+    const testCard = document.querySelector(`[data-test-id="${testId}"]`);
+    if (!statusElement || !testCard) return;
+
+    const now = new Date().getTime();
+    const examTime = new Date(examDate).getTime();
+    const examEndTime = examTime + (duration * 60 * 1000);
+
+    if (now < examTime) {
+        // Test hasn't started yet
+        statusElement.innerHTML = '<button disabled class="w-full bg-gray-300 text-gray-500 py-2 px-4 rounded-lg font-medium cursor-not-allowed">Test Not Started Yet</button>';
+        if (leaderboardElement) leaderboardElement.classList.add('hidden');
+        testCard.style.display = 'block';
+    } else if (now >= examTime && now <= examEndTime) {
+        // Test is currently active
+        statusElement.innerHTML = `<a href="/test/${testId}" class="w-full bg-accent text-white py-2 px-4 rounded-lg font-medium hover:bg-yellow-600 transition duration-150 ease-in-out text-center block">Start Test</a>`;
+        if (leaderboardElement) leaderboardElement.classList.add('hidden');
+        testCard.style.display = 'block';
+    } else {
+        // Test has ended - show leaderboard link
+        statusElement.innerHTML = '<button disabled class="w-full bg-gray-300 text-gray-500 py-2 px-4 rounded-lg font-medium cursor-not-allowed">Test Ended</button>';
+        if (leaderboardElement) leaderboardElement.classList.remove('hidden');
+        testCard.style.display = 'block';
+    }
+}
+
+// Update timers and status every second
+setInterval(function() {
+    {% for test in tests %}
+    updateTimer('{{ test._id }}', '{{ test.exam_date.isoformat() }}', {{ test.duration }});
+    updateTestStatus('{{ test._id }}', '{{ test.exam_date.isoformat() }}', {{ test.duration }});
+    {% endfor %}
+}, 1000);
+
+// Initial update
+{% for test in tests %}
+updateTimer('{{ test._id }}', '{{ test.exam_date.isoformat() }}', {{ test.duration }});
+updateTestStatus('{{ test._id }}', '{{ test.exam_date.isoformat() }}', {{ test.duration }});
+{% endfor %}
+</script>
+{% endblock %} 
